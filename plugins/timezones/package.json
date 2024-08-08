@@ -1,6 +1,0 @@
-{
-	"dependencies": {
-		"@uwu/tz-picker": "^1.0.1",
-		"timezone": "^1.0.23"
-	}
-}

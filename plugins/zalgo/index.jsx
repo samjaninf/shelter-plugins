@@ -1,8 +1,15 @@
 const {
 	plugin: { store },
 	http: { intercept },
-	ui: { Header, HeaderTags, TextBox },
-	util: { showToast, ErrorBoundary },
+	ui: {
+		Header,
+		HeaderTags,
+		TextBox,
+		ErrorBoundary,
+		SwitchItem,
+		Slider,
+		showToast,
+	},
 } = shelter;
 
 const zalgoUp = [
@@ -125,104 +132,46 @@ const zalgoDown = [
 	/*     ͚     */ "\u0323" /*     ̣     */,
 ];
 
-const defaultSettings = {
-	corruptionAmount: 1.0,
-	rampEnd: 0.7,
-	corruptUp: false,
-	corruptMid: true,
-	corruptDown: false,
-};
-
 function selectRandomElement(arr) {
 	const randomIndex = Math.floor(Math.random() * arr.length);
 	return arr[randomIndex];
 }
-// returns true if all characters in the string are the same
-// "aaaaaaaaaaaaa" -> true
-// "aaaaaaaaaaaab" -> false
-const isOneCharacterString = (str) => {
-	return str.split("").every((char) => char === str[0]);
-};
-
-// function replaceString(inputString) {
-//   let replaced = false;
-//   for (const replacement of replacements) {
-//     const regex = new RegExp(`\\b${replacement[0]}\\b`, "gi");
-//     if (regex.test(inputString)) {
-//       inputString = inputString.replace(regex, replacement[1]);
-//       replaced = true;
-//     }
-//   }
-//   return replaced ? inputString : false;
-// }
 
 function zalgoify(message) {
-	const rule = /\S+|\s+/g;
-	const words = message.match(rule);
-	let answer = "";
-
-	if (words === null) return "";
-
-	let regex =
-		/\{\{(?:(?:(?:(o|b))?,?)?(?:(r)(\d+(?:\.\d+)?)?,?)?(?:(\d+(?:\.\d+)?)-)?(\d+(?:\.\d+)?)?\:)?((?:(?!{{).)*?)\}\}/g;
-	if (regex.test(message)) {
-		message = message.replace(regex, doZalgo(message));
-		if (message.length > 2000) {
-			// log("This message would exceed the 2000-character limit.\nReduce corruption amount or shorten text.\n\nLength including corruption: " + value.length, { type: 'error' });
-			showToast({
-				title: "Message Too Long",
-				content:
-					"This message would exceed the 2000-character limit.\nReduce corruption amount or shorten text.\n\nLength including corruption: " +
-					value.length,
-				onClick() {},
-				duration: 3000,
-			});
-			// e.preventDefault();
-			return <ErrorBoundary />;
-		}
-		message = message;
+	line = doZalgo((contents = message));
+	// if (message.length > 2000) {
+	if (line.length > 2000) {
+		return <ErrorBoundary />;
 	}
-
-	for (let i = 0; i < words.length; i++) {
-		if (isOneCharacterString(words[i]) || words[i].startsWith("https://")) {
-			answer += words[i];
-			continue;
-		}
-	}
-
-	// answer += " " + selectRandomElement(endings);
-	return answer;
+	return line;
 }
 
-function doZalgo(
-	match,
-	midMode,
-	ramp,
-	rampEnd,
-	startAmt,
-	endAmt,
-	contents,
-	offset,
-	string,
-) {
-	const maxAmt = 10;
-	let hasStart = startAmt >= 0 && startAmt <= maxAmt;
-	let hasEnd = endAmt >= 0 && endAmt <= maxAmt;
-	let hasRampEnd = rampEnd >= 0 && rampEnd <= 1;
+function doZalgo(message) {
+	let corruptMid =
+		store.corruptMid !== undefined
+			? store.corruptMid == "o"
+				? "o"
+				: "b"
+			: "b";
 
-	let corruptMid = midMode == "o" || (midMode != "b" && store.corruptMid);
-	let doRamp = ramp == "r" || hasStart;
+	let rampEnd =
+		store.rampEnd !== undefined
+			? store.rampEnd > 1.0
+				? 1.0
+				: store.rampEnd
+			: 0.05;
 
-	if (!hasRampEnd) rampEnd = store.rampEnd;
-	// use default end amount if not provided
-	if (!hasEnd) endAmt = store.corruptionAmount;
-	// set end/start amounts to equal if we're not ramping anyway
-	if (!doRamp) startAmt = endAmt;
-	// otherwise, start at 0 if we are ramping but no start provided
-	else if (!hasStart) startAmt = 0;
+	let endAmt =
+		store.corruptionAmount !== undefined
+			? store.corruptionAmount > 10.0
+				? 10.0
+				: store.corruptionAmount
+			: 0.05;
+
+	let startAmt = 0;
 
 	return getZalgo(
-		contents,
+		message,
 		corruptMid,
 		parseFloat(rampEnd),
 		parseFloat(startAmt),
@@ -236,11 +185,7 @@ function getZalgo(txt, corruptMid, rampEnd, startAmt, endAmt) {
 	// See original at http://eeemo.net/
 	//============================================================
 
-	// Get saved options for corruption directions
-	let config = store;
-	let optUp = config.corruptUp;
 	let optMid = corruptMid;
-	let optDown = config.corruptDown || (!optUp && !optMid);
 
 	let newTxt = "";
 
@@ -272,13 +217,14 @@ function getZalgo(txt, corruptMid, rampEnd, startAmt, endAmt) {
 		let numDown = amt * (rand(64) / 4 + 3) * upDownMod;
 
 		// upward zalgo is disabled in current version except through manual config modification
-		if (optUp) for (var j = 0; j < numUp; j++) newTxt += randZalgo(zalgoUp);
+		if (store.corruptDir == "corruptUp")
+			for (var j = 0; j < numUp; j++) newTxt += randZalgo(zalgoUp);
 
 		// middle corruption obscures the text itself
 		if (optMid) for (var j = 0; j < numMid; j++) newTxt += randZalgo(zalgoMid);
 
 		// downward corruption begins at the text baseline
-		if (optDown)
+		if (store.corruptDir == "corruptDown")
 			for (var j = 0; j < numDown; j++) newTxt += randZalgo(zalgoDown);
 	}
 
@@ -317,7 +263,7 @@ const unintercept = intercept(
 		}
 		if (newContent.startsWith("!z ")) {
 			newContent = newContent.replace("!z ", "", 1);
-			req.body.content = zalgoify((contents = newContent));
+			req.body.content = zalgoify(newContent);
 		}
 		return send(req);
 	},
@@ -330,22 +276,38 @@ export function onUnload() {
 export const settings = () => (
 	<>
 		<Header tag={HeaderTags.H3}>Corruption Amount</Header>
-		<TextBox
-			placeholder="0.05"
+		<Slider
+			tootltip="From 0.05 to a maximum of 10"
+			min="0.05"
+			max="10.0"
+			step="0.01"
 			value={store.corruptionAmount}
 			onInput={(v) => (store.corruptionAmount = v)}
 		/>
 		<Header tag={HeaderTags.H3}>Ramp end position</Header>
-		<TextBox
-			placeholder="0.05"
+		<Slider
+			tooltip="From 0.05 to a Maximum of 1"
+			min="0.05"
+			max="1.0"
+			step="0.01"
 			value={store.rampEnd}
 			onInput={(v) => (store.rampEnd = v)}
 		/>
 		<Header tag={HeaderTags.H3}>Obscure text</Header>
 		<TextBox
+			tooltip="o for over the text, or b for behind the text."
 			placeholder="b"
 			value={store.corruptMid}
 			onInput={(v) => (store.corruptMid = v)}
 		/>
+		<Header tag={HeaderTags.H3}>Corruption Direction</Header>
+		<select
+			value={store.corruptDir}
+			onInput={(v) => (store.corruptDir = v.target.value)}
+		>
+			<option value="corruptMid">Mid</option>
+			<option value="corruptUp">Up</option>
+			<option value="corruptDown">Down</option>
+		</select>
 	</>
 );
