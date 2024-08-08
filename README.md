@@ -1,8 +1,5 @@
 # Subtle Fire's shelter Plugins
 
-> [!CAUTION]
-> :warning: **Nothing works here yet.** This is all for testing.
-
 To install, copy the url listed into shelter.
 Don't click them and expect them to work in a browser.
 
