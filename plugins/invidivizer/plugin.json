@@ -1,5 +1,5 @@
 {
-	"name": "Invidivizer",
-	"author": "Yellowsink",
-	"description": "Replaces Youtube embeds with invidious embeds in Discord"
+	"name": "Invidivizer (no autoplay attempt)",
+	"author": "samjaninf",
+	"description": "Based on Yellowsink's Invidivizer plugin, it replaces Youtube embeds with invidious embeds in Discord"
 }

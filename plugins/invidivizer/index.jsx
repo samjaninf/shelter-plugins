@@ -43,13 +43,41 @@ function handleDispatch(payload) {
 				.querySelector(`iframe[src*="${store.instance}"]`)
 				?.remove();
 
-			const found = reactFiberWalker(getFiber(e), "embed", true)?.memoizedProps
+			// const found = reactFiberWalker(getFiber(e), "embed", true)?.memoizedProps
+			const yurl = reactFiberWalker(getFiber(e), "embed", true)?.memoizedProps
 				?.embed?.url;
-			if (
-				!(typeof found === "string") ||
-				!found.startsWith("https://www.youtube.com")
-			)
-				return;
+      // const yurl = new URL(found)
+        
+      if (
+        // !(typeof found === "string") ||
+        !(typeof yurl.hostname === "string") ||
+        // !found.startsWith("https://www.youtube.com") ||
+        !yurl.hostname === ("youtube.com") ||
+        // !found.startsWith("https://www.youtu.be") ||
+        !yurl.hostname === ("youtu.be") ||
+        !yurl.hostname === ("youtube-nocookie.com") ||
+        !yurl.hostname.endsWith(".youtube.com") ||
+        !yurl.hostname.endsWith(".youtube-nocookie.com") ||
+        !yurl.hostname.endsWith(".youtu.be")
+      )
+      return;
+      
+      let thumbs = e.parentElement.querySelectorAll('img[src*="img.youtube.com"], img[src*="i.ytimg.com"]');
+    
+      for (let x = 0; x < thumbs.length; x++) 
+      {
+          let thumb = thumbs[x];
+          let thumbsrc = new URL(thumb.src);
+          
+          if (thumbsrc.hostname === "img.youtube.com" || thumbsrc.hostname === "i.ytimg.com")
+          {
+              if (thumb.hasAttribute('srcset') && thumb.srcset.indexOf(thumbsrc) !== -1)
+              {
+                  thumb.setAttribute('srcset', thumb.srcset.replace(thumbsrc, thumbsrc.protocol + '//' + instance + thumbsrc.pathname + thumbsrc.search + thumbsrc.hash));
+              }
+              thumb.setAttribute('src', thumbsrc.protocol + '//' + instance + thumbsrc.pathname + thumbsrc.search + thumbsrc.hash);
+          }
+      }
 
 			const match = found.match(/v=([a-zA-Z0-9-_]+)/);
 			if (!match?.[1]) return;
@@ -62,7 +90,7 @@ function handleDispatch(payload) {
 				"afterend",
 				<iframe
 					style="border: 0; width: 100%; max-width: 600px; aspect-ratio: 16/9"
-					src={`https://${store.instance}/embed/${embPath}`}
+					src={`https://${store.instance}/embed/${embPath}?autoplay=0`}
 					allow="fullscreen"
 				/>,
 			);
