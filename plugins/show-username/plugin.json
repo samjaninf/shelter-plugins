@@ -1,6 +1,6 @@
 {
 	"name": "Show Username Reloaded",
-	"description": "Show usernames for users with nicknames.",
-	"author": "Yellowsink",
+	"description": "Show usernames for users with nicknames. Forked from yellowsink -> ioj4/show-username",
+	"author": "samjaninf",
 	"hash": "<HASH_PLACEHOLDER>"
 }
