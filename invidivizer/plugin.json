@@ -1,5 +1,5 @@
 {
 	"name": "Invidivizer (no autoplay attempt)",
 	"author": "Subtle Fire",
-	"description": "Replaces YouTube embeds with Invidious ones that don't autoplay. Fork of yellowsink -> Milkshiift/invidivizer"
+	"description": "Replaces YouTube embeds with Invidious ones that don't autoplay. Fork of yellowsink"
 }
