@@ -12,8 +12,8 @@ importers:
         specifier: ^1.5.3
         version: 1.5.3
       '@uwu/lune':
-        specifier: ^1.6.1
-        version: 1.6.1
+        specifier: ^1.6.2
+        version: 1.6.2
       '@uwu/shelter-defs':
         specifier: ^1.4.1
         version: 1.4.1
@@ -578,8 +578,8 @@ packages:
   '@types/lodash@4.17.13':
     resolution: {integrity: sha512-lfx+dftrEZcdBPczf9d0Qv0x+j/rfNCMuC6OcfXmO8gkfeNAY88PgKUbvG56whcN23gc27yenwF6oJZXGFpYxg==}
 
-  '@uwu/lune@1.6.1':
-    resolution: {integrity: sha512-G2u88HsU1JB0vL9JPuXufAFtvy9lDeZB4qTQIjou1jQMsxw3vkGooV87BLQsw/FAUmEwgRTuuURj+G3tWCPikw==}
+  '@uwu/lune@1.6.2':
+    resolution: {integrity: sha512-0/e1zFGm7pBISyuNvhKMqdg4gEQOpBtf8wdquJaUDqA0enrV55iwMWrrCdJHlfx77K1D8hjnAUGvCXxwFebg5Q==}
     hasBin: true
 
   '@uwu/monaco-solid@1.1.0':
@@ -1430,7 +1430,7 @@ snapshots:
 
   '@types/lodash@4.17.13': {}
 
-  '@uwu/lune@1.6.1':
+  '@uwu/lune@1.6.2':
     dependencies:
       '@babel/core': 7.26.0
       '@babel/preset-typescript': 7.26.0(@babel/core@7.26.0)
